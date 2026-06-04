@@ -1,22 +1,59 @@
-"""
-URL configuration for ai_solutions project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/6.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+
+from django.conf import settings
+from django.conf.urls.static import static
+
+from rest_framework.routers import DefaultRouter
+
+from .views import (
+    ServiceViewSet,
+    ProjectViewSet,
+    TeamMemberViewSet,
+    CompanyTimelineViewSet,
+    EventViewSet,
+    GalleryImageViewSet,
+    TestimonialViewSet,
+    ContactInquiryViewSet,
+    DashboardMetricViewSet,
+    AiAssistantView,
+    AdminLoginView,
+    AdminTokenObtainPairView,
+    TokenRefreshView,
+)
+
+router = DefaultRouter()
+
+router.register(r"services", ServiceViewSet, basename="services")
+router.register(r"projects", ProjectViewSet, basename="projects")
+router.register(r"team-members", TeamMemberViewSet, basename="team-members")
+router.register(r"timeline", CompanyTimelineViewSet, basename="timeline")
+router.register(r"events", EventViewSet, basename="events")
+router.register(r"gallery", GalleryImageViewSet, basename="gallery")
+router.register(r"testimonials", TestimonialViewSet, basename="testimonials")
+router.register(r"inquiries", ContactInquiryViewSet, basename="inquiries")
+router.register(r"dashboard-metrics", DashboardMetricViewSet, basename="dashboard-metrics")
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    # Django Admin
+    path("admin/", admin.site.urls),
+
+    # API Endpoints
+    path("api/", include(router.urls)),
+    path("api/ai/ask/", AiAssistantView.as_view(), name="ai_assistant"),
+    path("api/admin/login/", AdminLoginView.as_view(), name="admin_login"),
+    path("api/token/", AdminTokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
 ]
+
+# Media & Static Files
+if settings.DEBUG:
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root=settings.MEDIA_ROOT
+    )
+
+    urlpatterns += static(
+        settings.STATIC_URL,
+        document_root=settings.STATIC_ROOT
+    )
